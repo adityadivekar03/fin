@@ -1,0 +1,62 @@
+# docker-compose.yml
+
+version: "3.2"
+
+services:
+  rabbitmq-server:
+    build: ./rabbitmq-server
+
+  trade-receiver-service:
+    build: ./trade-receiver-service
+
+    depends_on:
+      - rabbitmq-server
+
+    tty: true
+
+    ports:
+      - "3000:3000"
+
+    volumes:
+      - './trade-receiver-service:/trade-receiver-service'
+
+
+  market-data-service:
+    build: ./market-data-service
+
+    depends_on:
+      - rabbitmq-server
+      - trade-receiver-service
+
+    tty: true
+
+    volumes:
+      - './market-data-service:/market-data-service'
+
+  stallone-service:
+    build: ./stallone-service
+
+    depends_on:
+      - rabbitmq-server
+
+    tty: true
+
+    volumes:
+      - './stallone-service:/stallone-service'
+
+  trade-publisher-service:
+    build: ./trade-publisher-service
+
+    depends_on:
+      - rabbit-mq-server
+
+    tty: true
+
+    volumes: './trade-publisher-service:/trade-publihser-service'
+
+volumes:
+  trade-receiver-service:
+    market-data-service:
+    stallone-service:
+    trade-publisher-service:
+
