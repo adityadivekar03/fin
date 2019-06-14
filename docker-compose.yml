@@ -1,62 +1,37 @@
-# docker-compose.yml
-
-version: "3.2"
+version: '3'
 
 services:
-  rabbitmq-server:
-    build: ./rabbitmq-server
+
+  rabbitmq:
+    image: 'rabbitmq:3.6-management-alpine'
+    ports:
+      - '5672:5672'
+      - '15672:15672'
+
+    networks:
+      - network
+
 
   trade-receiver-service:
-    build: ./trade-receiver-service
-
-    depends_on:
-      - rabbitmq-server
-
+    build:
+      context: trade-receiver-service/
+      dockerfile: DockerFile
+    environment:
+      AMQP_URL: 'amqp://rabbitmq?connection_attempts=5&retry_delay=5'
     tty: true
-
-    ports:
-      - "3000:3000"
-
-    volumes:
-      - './trade-receiver-service:/trade-receiver-service'
+    networks:
+      - network
 
 
   market-data-service:
-    build: ./market-data-service
-
-    depends_on:
-      - rabbitmq-server
-      - trade-receiver-service
-
+    build:
+      context: market-data-service/
+      dockerfile: Dockerfile
+    environment:
+      AMQP_URL: 'amqp://rabbitmq?connection_attempts=5&retry_delay=5'
     tty: true
+    networks:
+      - network
 
-    volumes:
-      - './market-data-service:/market-data-service'
-
-  stallone-service:
-    build: ./stallone-service
-
-    depends_on:
-      - rabbitmq-server
-
-    tty: true
-
-    volumes:
-      - './stallone-service:/stallone-service'
-
-  trade-publisher-service:
-    build: ./trade-publisher-service
-
-    depends_on:
-      - rabbit-mq-server
-
-    tty: true
-
-    volumes: './trade-publisher-service:/trade-publihser-service'
-
-volumes:
-  trade-receiver-service:
-    market-data-service:
-    stallone-service:
-    trade-publisher-service:
-
+networks:
+  network: {}

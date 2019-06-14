@@ -1,0 +1,12 @@
+FROM python:3
+
+RUN mkdir /trade-receiver-service
+WORKDIR /trade-receiver-service
+
+COPY . /trade-receiver-service
+
+RUN pip install --trusted-host pypi.python.org -r requirements.txt
+
+EXPOSE 80
+
+RUN ["python", "main.py"]
