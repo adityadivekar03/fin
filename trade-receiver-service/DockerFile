@@ -1,14 +1,11 @@
-FROM python:3
-
-RUN mkdir /trade-receiver-service
+FROM python:3.7-slim
+RUN apt-get update && apt-get install -y gcc curl wget
+RUN apt-get install -y npm && npm install nodemon --global
 WORKDIR /trade-receiver-service
-
+ENV FLASK_APP main.py
+ENV FLASK_RUN_HOST 0.0.0.0
 ENV PYTHONPATH /trade-receiver-service
-
-COPY . /trade-receiver-service
-
+COPY requirements.txt requirements.txt
 RUN pip install --trusted-host pypi.python.org -r requirements.txt
-
-EXPOSE 80
-
-RUN ["python", "main.py"]
+COPY . /trade-receiver-service
+CMD ["flask", "run"]

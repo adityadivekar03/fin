@@ -1,9 +1,8 @@
 #!/usr/bin/env python
 
 # Publisher config
-
 cfg = {
-    'host': 'fin_rabbitmq_1',
-    'exchangeName': 'trade_updates',
+    'host': 'rabbitmq',
+    'exchangeName': 'trades',
     'routingKey': 'new_trade',
 }

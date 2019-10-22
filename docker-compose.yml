@@ -1,13 +1,11 @@
 version: '3'
 
 services:
-
   rabbitmq:
     image: 'rabbitmq:3.6-management-alpine'
     ports:
       - '5672:5672'
       - '15672:15672'
-
     networks:
       - network
 
@@ -16,9 +14,16 @@ services:
     build:
       context: trade-receiver-service/
       dockerfile: DockerFile
+    #command: nodemon --exec "python" main.py
     environment:
+      FLASK_ENV: development
       AMQP_URL: 'amqp://rabbitmq?connection_attempts=5&retry_delay=5'
     tty: true
+    restart: on-failure:5
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./trade-receiver-service:/trade-receiver-service
     networks:
       - network
 
@@ -27,9 +32,33 @@ services:
     build:
       context: market-data-service/
       dockerfile: Dockerfile
+    #command: nodemon --exec "python" main.py
     environment:
-      AMQP_URL: 'amqp://rabbitmq?connection_attempts=5&retry_delay=5'
+      - IEX_TOKEN=Tpk_36614967265944c6b4b3e47be6b2b3ca
+      - IEX_API_VERSION=iexcloud-sandbox
+      - AMQP_URL='amqp://rabbitmq?connection_attempts=5&retry_delay=5'
     tty: true
+    depends_on:
+      - rabbitmq
+    restart: on-failure:5
+    volumes:
+      - ./market-data-service:/market-data-service
+    networks:
+      - network
+
+  stallone-service:
+    build:
+      context: stallone-service
+      dockerfile: DockerFile
+    environment:
+      - AMQP_URL='amqp://rabbitmq?connection_attempts=5&retry_delay=5'
+    tty: true
+    depends_on:
+      - rabbitmq
+      - market-data-service
+    restart: on-failure:5
+    volumes:
+      - ./stallone-service:/stallone-service
     networks:
       - network
 

@@ -1,10 +1,9 @@
 FROM python:3.7-slim
 RUN apt-get update && apt-get install -y gcc curl wget
 RUN apt-get install -y npm && npm install nodemon --global
-WORKDIR /market-data-service
+WORKDIR /stallone-service
+ENV PYTHONPATH /stallone-service
 COPY requirements.txt requirements.txt
-ENV PYTHONPATH /market-data-service
 RUN pip install -r requirements.txt
-COPY . /market-data-service
-EXPOSE 80
+COPY . /stallone-service
 #CMD ["python", "main.py"]

@@ -8,6 +8,11 @@ from config import cfg
 app = Flask(__name__)
 
 
+@app.route('/')
+def hello():
+    return 'Hello World! I have been seen!.\n'
+
+
 @app.route('/trades/<symbol>/<qty>/<side>', methods=['POST'])
 def new_trade(symbol, qty, side):
     trade = dict()

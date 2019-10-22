@@ -1,45 +1,61 @@
 from consumer import Consumer
-from config import subcfg, pubcfg
 from iexfinance.stocks import Stock
-import threading
+import json
+from threading import Thread, Lock
 from publisher import Publisher
 import time
+import config as cfg
 
 MD_SUBSCRIPTIONS = []
-MD_BATCH = Stock()
+IEX_TOKEN = "Tpk_36614967265944c6b4b3e47be6b2b3ca"
+MUTEX = Lock()
 
 
-def on_callback(ch, method, properties, body):
+def on_callback(body):
     print("Received {}".format(body))
+    body = json.loads(body)
+    if 'symbol' not in body:
+        print('Unexpected trade with no symbol')
+    else:
+        MUTEX.acquire()
+        MD_SUBSCRIPTIONS.append(body['symbol'])
+        MUTEX.release()
 
 
-def create_md_subscription(symbol):
-    MD_SUBSCRIPTIONS.append(symbol)
-    MD_BATCH = Stock(MD_SUBSCRIPTIONS)
-
-
-def on_trade():
-    consumer = Consumer(subcfg)
+def start_main():
+    consumer = Consumer(cfg.subcfg)
     with consumer:
         consumer.consume(on_callback)
 
 
+def update_md_snaphots(prices):
+    pass
+
+
 def stream_quotes():
-    prices = MD_BATCH.get_price()
-    # publish prices to stallone service
-    pub = Publisher(pubcfg)
-    pub.publish(prices)
-    time.sleep(10)
-    t = threading.Thread(target=stream_quotes)
-    t.start()
+    if len(MD_SUBSCRIPTIONS) > 0:
+        md_batch = Stock(MD_SUBSCRIPTIONS, token=IEX_TOKEN)
+        prices = md_batch.get_price()
+        update_md_snaphots(prices)
+        pub = Publisher(cfg.pubcfg)
+        pub.publish(prices)
+        print('Publishing prices .. ----> \n')
+        print(prices)
+    else:
+        print('No quotes to stream')
+    time.sleep(5)
+    stream_quotes()
 
 
 if __name__ == "__main__":
-    # start quote streaming service
+    # Start quote streaming service
+    print('Starting quote streaming service...')
     threads = []
-    t = threading.Thread(target=stream_quotes)
+    t = Thread(target=stream_quotes)
     threads.append(t)
     t.start()
-    time.sleep(5)
-    # start listening to entered trades
-    on_trade()
+    time.sleep(1)
+
+    # Start listening to entered trades
+    print('Starting market data service...')
+    start_main()

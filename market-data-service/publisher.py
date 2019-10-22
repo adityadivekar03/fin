@@ -1,4 +1,5 @@
 import pika
+import json
 import traceback
 
 
@@ -17,7 +18,7 @@ class Publisher:
             channel = connection.channel()
             channel.exchange_declare(exchange=self.config['exchangeName'], passive=True)
             channel.basic_publish(exchange=self.config['exchangeName'], routing_key=self.config['routingKey'],
-                                  body=message)
+                                  body=json.dumps(message))
             print("[x] Sent message %r " % message)
         except Exception as e:
             print(repr(e))
