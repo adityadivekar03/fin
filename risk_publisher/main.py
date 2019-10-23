@@ -1,0 +1,41 @@
+from threading import Thread
+import time
+
+from common_utils import Logger
+import config as cfg
+from consumer import Consumer
+
+def on_trades_callback(body):
+    print('Received trade ----> {}'.format(body))
+
+
+def on_quotes_callback(body):
+    print('Received quote -----> {}'.format(body))
+
+
+def start_listening_trades():
+    consumer = Consumer(cfg.subcfg_trades)
+    with consumer:
+        consumer.consume(on_trades_callback)
+
+
+def start_listening_quotes():
+    consumer = Consumer(cfg.subcfg_quotes)
+    with consumer:
+        consumer.consume(on_quotes_callback)
+
+
+if __name__ == "__main__":
+    # Start listening to entered trades & entered quotes
+    print('Listening to entered trades...')
+    threads = []
+    t = Thread(target=start_listening_trades)
+    threads.append(t)
+    t.start()
+    time.sleep(1)
+
+    print('Listening to entered quotes...')
+    t = Thread(target=start_listening_quotes)
+    threads.append(t)
+    t.start()
+    time.sleep(1)

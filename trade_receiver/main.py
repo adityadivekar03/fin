@@ -2,8 +2,9 @@ from flask import Flask
 from flask import jsonify
 import random
 
-from publisher import Publisher
+from common_utils import Logger
 from config import cfg
+from publisher import Publisher
 
 app = Flask(__name__)
 

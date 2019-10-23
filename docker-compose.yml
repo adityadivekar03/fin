@@ -12,8 +12,8 @@ services:
 
   trade-receiver-service:
     build:
-      context: trade-receiver-service/
-      dockerfile: DockerFile
+      context: .
+      dockerfile: ./trade_receiver/DockerFile
     #command: nodemon --exec "python" main.py
     environment:
       FLASK_ENV: development
@@ -23,15 +23,15 @@ services:
     ports:
       - "5000:5000"
     volumes:
-      - ./trade-receiver-service:/trade-receiver-service
+      - ./trade_receiver:/trade_receiver
     networks:
       - network
 
 
   market-data-service:
     build:
-      context: market-data-service/
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: ./market_data/Dockerfile
     #command: nodemon --exec "python" main.py
     environment:
       - IEX_TOKEN=Tpk_36614967265944c6b4b3e47be6b2b3ca
@@ -42,14 +42,14 @@ services:
       - rabbitmq
     restart: on-failure:5
     volumes:
-      - ./market-data-service:/market-data-service
+      - ./market_data:/market_data
     networks:
       - network
 
-  stallone-service:
+  risk-publisher-service:
     build:
-      context: stallone-service
-      dockerfile: DockerFile
+      context: .
+      dockerfile: ./risk_publisher/DockerFile
     environment:
       - AMQP_URL='amqp://rabbitmq?connection_attempts=5&retry_delay=5'
     tty: true
@@ -58,7 +58,7 @@ services:
       - market-data-service
     restart: on-failure:5
     volumes:
-      - ./stallone-service:/stallone-service
+      - ./risk_publisher:/risk_publisher
     networks:
       - network
 

@@ -1,9 +1,9 @@
 FROM python:3.7-slim
 RUN apt-get update && apt-get install -y gcc curl wget
 RUN apt-get install -y npm && npm install nodemon --global
-WORKDIR /stallone-service
-ENV PYTHONPATH /stallone-service
-COPY requirements.txt requirements.txt
+WORKDIR /risk-publisher-service
+ENV PYTHONPATH /risk-publisher-service
+COPY ./risk_publisher/requirements.txt requirements.txt
 RUN pip install -r requirements.txt
-COPY . /stallone-service
+COPY ./risk_publisher/ /risk-publisher-service
 #CMD ["python", "main.py"]

@@ -5,7 +5,7 @@ WORKDIR /trade-receiver-service
 ENV FLASK_APP main.py
 ENV FLASK_RUN_HOST 0.0.0.0
 ENV PYTHONPATH /trade-receiver-service
-COPY requirements.txt requirements.txt
+COPY ./trade_receiver/requirements.txt requirements.txt
 RUN pip install --trusted-host pypi.python.org -r requirements.txt
-COPY . /trade-receiver-service
+COPY ./trade_receiver/ /trade-receiver-service
 CMD ["flask", "run"]
