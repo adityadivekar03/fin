@@ -5,9 +5,9 @@ from threading import Thread, Lock
 import time
 
 from common_utils import Logger
-import config as cfg
-from consumer import Consumer
-from publisher import Publisher
+from .config import *
+from .consumer import Consumer
+from .publisher import Publisher
 
 MD_SUBSCRIPTIONS = []
 IEX_TOKEN = "Tpk_36614967265944c6b4b3e47be6b2b3ca"
@@ -28,7 +28,7 @@ def on_callback(body):
 
 
 def start_main():
-    consumer = Consumer(cfg.subcfg)
+    consumer = Consumer(subcfg)
     with consumer:
         consumer.consume(on_callback)
 
@@ -77,7 +77,7 @@ def stream_quotes():
         prices = md_batch.get_price()
         tops = get_tops(MD_SUBSCRIPTIONS)
         update_md_snaphots(tops)
-        pub = Publisher(cfg.pubcfg)
+        pub = Publisher(pubcfg)
         pub.publish(prices)
         print('Publishing prices .. ----> \n')
         print(prices)

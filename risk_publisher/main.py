@@ -2,8 +2,8 @@ from threading import Thread
 import time
 
 from common_utils import Logger
-import config as cfg
-from consumer import Consumer
+from .config import *
+from .consumer import Consumer
 
 def on_trades_callback(body):
     print('Received trade ----> {}'.format(body))
@@ -14,13 +14,13 @@ def on_quotes_callback(body):
 
 
 def start_listening_trades():
-    consumer = Consumer(cfg.subcfg_trades)
+    consumer = Consumer(subcfg_trades)
     with consumer:
         consumer.consume(on_trades_callback)
 
 
 def start_listening_quotes():
-    consumer = Consumer(cfg.subcfg_quotes)
+    consumer = Consumer(subcfg_quotes)
     with consumer:
         consumer.consume(on_quotes_callback)
 
