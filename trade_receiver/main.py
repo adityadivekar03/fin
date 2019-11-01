@@ -11,15 +11,16 @@ app = Flask(__name__)
 
 @app.route('/')
 def hello():
-    return 'Hello World! I have been seen!.\n'
+    return 'Hello! Welcome to Fin.!\n'
 
 
-@app.route('/trades/<symbol>/<qty>/<side>', methods=['POST'])
-def new_trade(symbol, qty, side):
+@app.route('/trades/<trader_id>/<symbol>/<qty>/<side>', methods=['POST'])
+def new_trade(trader_id, symbol, qty, side):
     trade = dict()
     trade['symbol'] = symbol
     trade['qty'] = qty
     trade['side'] = side
+    trade['trader_id'] = trader_id
 
     trade_id = emit_trade(trade)
 
