@@ -14,7 +14,6 @@ services:
     build:
       context: .
       dockerfile: ./trade_receiver/DockerFile
-    #command: nodemon --exec "python" main.py
     environment:
       FLASK_ENV: development
       AMQP_URL: 'amqp://rabbitmq?connection_attempts=5&retry_delay=5'
@@ -24,6 +23,7 @@ services:
       - "5000:5000"
     volumes:
       - ./trade_receiver:/trade_receiver
+      - ./common_utils:/trade_receiver/common_utils
     networks:
       - network
 
@@ -32,7 +32,6 @@ services:
     build:
       context: .
       dockerfile: ./market_data/Dockerfile
-    #command: nodemon --exec "python" main.py
     environment:
       - IEX_TOKEN=Tpk_36614967265944c6b4b3e47be6b2b3ca
       - IEX_API_VERSION=iexcloud-sandbox
@@ -43,6 +42,7 @@ services:
     restart: on-failure:5
     volumes:
       - ./market_data:/market_data
+      - ./common_utils:/market_data/common_utils
     networks:
       - network
 
@@ -59,6 +59,7 @@ services:
     restart: on-failure:5
     volumes:
       - ./risk_publisher:/risk_publisher
+      - ./common_utils:/risk_publisher/common_utils
     networks:
       - network
 

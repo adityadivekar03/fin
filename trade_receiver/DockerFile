@@ -1,11 +1,12 @@
 FROM python:3.7-slim
 RUN apt-get update && apt-get install -y gcc curl wget
 RUN apt-get install -y npm && npm install nodemon --global
-WORKDIR /trade-receiver-service
+WORKDIR /trade_receiver
 ENV FLASK_APP main.py
 ENV FLASK_RUN_HOST 0.0.0.0
-ENV PYTHONPATH /trade-receiver-service
+ENV PYTHONPATH /trade_receiver
 COPY ./trade_receiver/requirements.txt requirements.txt
 RUN pip install --trusted-host pypi.python.org -r requirements.txt
-COPY ./trade_receiver/ /trade-receiver-service
+COPY ./trade_receiver/ /trade_receiver
+COPY ./common_utils /trade_receiver/common_utils
 CMD ["flask", "run"]

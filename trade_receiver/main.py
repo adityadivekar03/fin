@@ -3,8 +3,8 @@ from flask import jsonify
 import random
 
 from common_utils import Logger
-from .config import cfg
-from .publisher import Publisher
+from config import cfg
+from common_utils.publisher import Publisher
 
 app = Flask(__name__)
 

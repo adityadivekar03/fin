@@ -7,7 +7,7 @@ class Logger(object):
     def __init__(self, name):
         name = name.replace('.log', '')
         logger = logging.getLogger('%s.%s' % (settings.LOGGING_NAMESPACE, name))
-        logger.setLevel(logging.DEBUG)
+        logger.setLevel(logging.INFO)
         if not logger.handlers:
             file_name = os.path.join(settings.LOGGING_DIR, '%s.log' % name)
             handler = logging.FileHandler(file_name)

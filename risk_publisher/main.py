@@ -1,9 +1,14 @@
+import logging
 from threading import Thread
 import time
 
 from common_utils import Logger
-from .config import *
-from .consumer import Consumer
+from common_utils.consumer import Consumer
+from config import *
+
+logger = Logger.Logger("market_data").get()
+logger.setLevel(logging.DEBUG)
+
 
 def on_trades_callback(body):
     print('Received trade ----> {}'.format(body))
