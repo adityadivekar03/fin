@@ -99,17 +99,26 @@ def start_listening_quotes():
         consumer.consume(on_quotes_callback)
 
 
-if __name__ == "__main__":
-    # Start listening to entered trades & entered quotes
-    print('Listening to entered trades...')
-    threads = []
-    t = Thread(target=start_listening_trades)
-    threads.append(t)
-    t.start()
-    time.sleep(1)
+class RiskPublisher:
 
-    print('Listening to entered quotes...')
-    t = Thread(target=start_listening_quotes)
-    threads.append(t)
-    t.start()
-    time.sleep(1)
+    """Manages the risk metrics for all incoming orders on a per-trader level"""
+
+    def __init__(self):
+        self.threads = []
+
+    def start(self):
+        logger.info('Listening to entered trades...')
+        t = Thread(target=start_listening_trades)
+        self.threads.append(t)
+        t.start()
+        time.sleep(1)
+
+        logger.info('Listening to entered quotes...')
+        t = Thread(target=start_listening_quotes)
+        self.threads.append(t)
+        t.start()
+        time.sleep(1)
+
+
+if __name__ == "__main__":
+    RiskPublisher().start()
