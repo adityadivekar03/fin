@@ -76,29 +76,6 @@ class InventoryStore:
 INVENTORY_STORE = InventoryStore()
 
 
-def on_trades_callback(body):
-    # Save trade for the respective trader
-    INVENTORY_STORE.add_trade(trade=json.loads(body))
-    logger.debug('Received trade ----> {}'.format(body))
-
-
-def on_quotes_callback(body):
-    # Save in global quote bank
-    logger.debug('Received quote -----> {}'.format(body))
-
-
-def start_listening_trades():
-    consumer = Consumer(subcfg_trades)
-    with consumer:
-        consumer.consume(on_trades_callback)
-
-
-def start_listening_quotes():
-    consumer = Consumer(subcfg_quotes)
-    with consumer:
-        consumer.consume(on_quotes_callback)
-
-
 class RiskPublisher:
 
     """Manages the risk metrics for all incoming orders on a per-trader level"""
@@ -108,16 +85,35 @@ class RiskPublisher:
 
     def start(self):
         logger.info('Listening to entered trades...')
-        t = Thread(target=start_listening_trades)
+        t = Thread(target=self.start_listening_trades)
         self.threads.append(t)
         t.start()
         time.sleep(1)
 
         logger.info('Listening to entered quotes...')
-        t = Thread(target=start_listening_quotes)
+        t = Thread(target=self.start_listening_quotes)
         self.threads.append(t)
         t.start()
         time.sleep(1)
+
+    def start_listening_quotes(self):
+        consumer = Consumer(subcfg_quotes)
+        with consumer:
+            consumer.consume(self.on_quotes_callback)
+
+    def start_listening_trades(self):
+        consumer = Consumer(subcfg_trades)
+        with consumer:
+            consumer.consume(self.on_trades_callback)
+
+    # noinspection PyMethodMayBeStatic
+    def on_trades_callback(self, body):
+        INVENTORY_STORE.add_trade(trade=json.loads(body))
+        logger.debug('Received trade ----> {}'.format(body))
+
+    # noinspection PyMethodMayBeStatic
+    def on_quotes_callback(self, body):
+        logger.debug('Received quote -----> {}'.format(body))
 
 
 if __name__ == "__main__":
