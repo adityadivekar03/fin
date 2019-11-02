@@ -7,7 +7,7 @@ from common_utils import Logger
 from common_utils.consumer import Consumer
 from config import *
 
-logger = Logger.Logger("market_data").get()
+logger = Logger.Logger("risk_publisher").get()
 logger.setLevel(logging.DEBUG)
 
 

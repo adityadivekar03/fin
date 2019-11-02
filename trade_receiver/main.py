@@ -1,5 +1,5 @@
 from flask import Flask
-from flask import flash, jsonify, redirect, render_template, url_for
+from flask import flash, redirect, render_template, url_for
 import random
 
 from common_utils import Logger, settings
@@ -13,8 +13,7 @@ app.config['SECRET_KEY'] = settings.SECRET_KEY
 
 @app.route('/')
 def home():
-    # return 'Hello! Welcome to Fin.!\n'
-    return render_template('index.html', title='Trade Recevier')
+    return render_template('index.html', title='Trade Receiver')
 
 
 @app.route('/new_trade', methods=['GET', 'POST'])
@@ -24,25 +23,10 @@ def new_trade():
     if form.validate_on_submit():
         print('form validated')
         trade_id = publish_trade(form.trader_id.data, form.symbol.data, form.qty.data, form.side.data)
-        flash('Trade successfully entered - {} {} {} {}. Trade ID is {}.'.format(form.symbol.data, form.qty.data, form.side.data,
+        flash('Trade successfully entered - {} - {} - {} - {}. Trade ID is {}.'.format(form.symbol.data, form.qty.data, form.side.data,
                                                                 form.trader_id.data, trade_id))
         return redirect(url_for('home'))
-    else:
-        print(form.errors)
     return render_template('receive_trade.html', title='New Trade', form=form)
-
-
-# @app.route('/trades/<trader_id>/<symbol>/<qty>/<side>', methods=['POST'])
-# def publish_trade(trader_id, symbol, qty, side):
-#     trade = dict()
-#     trade['symbol'] = symbol
-#     trade['qty'] = qty
-#     trade['side'] = side
-#     trade['trader_id'] = trader_id
-#
-#     trade_id = emit_trade(trade)
-#
-#     return jsonify({'trade_id': trade_id}), 201
 
 
 def publish_trade(trader_id, symbol, qty, side):
