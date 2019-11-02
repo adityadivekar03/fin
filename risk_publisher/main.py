@@ -7,7 +7,7 @@ from common_utils import Logger
 from common_utils.consumer import Consumer
 from config import *
 
-logger = Logger.Logger("market_data").get()
+logger = Logger.Logger("risk_publisher").get()
 logger.setLevel(logging.DEBUG)
 
 
@@ -41,15 +41,15 @@ class Inventory:
     def add_trade(self, trade):
         if len(self.inventory) > 0:
             for i in range(0, len(self.inventory)):
-                if self.inventory[i].symbol == trade.symbol:
-                    if self.inventory[i].side == trade.side:
-                        self.inventory[i].qty += trade.qty
+                if self.inventory[i].symbol == trade['symbol']:
+                    if self.inventory[i].side == trade['side']:
+                        self.inventory[i].qty += trade['qty']
                     else:
-                        if self.inventory[i].qty > trade.qty:
-                            self.inventory[i].qty -= trade.qty
+                        if self.inventory[i].qty > trade['qty']:
+                            self.inventory[i].qty -= trade['qty']
                         else:
-                            self.inventory[i].qty = trade.qty - self.inventory[i].qty
-                            self.inventory[i].side = trade.side
+                            self.inventory[i].qty = trade['qty'] - self.inventory[i]['qty']
+                            self.inventory[i].side = trade['side']
                 else:
                     self.inventory.append(trade)
         else:
@@ -62,15 +62,15 @@ class InventoryStore:
 
     def __init__(self):
         self.inventories = []
-        self.traders_map = map()
+        self.traders_map = dict()
 
     def add_trade(self, trade):
-        if trade.trader_id in self.traders_map:
-            self.inventories[self.traders_map[trade.trader_id]].add_trade(trade)
+        if trade['trader_id'] in self.traders_map:
+            self.inventories[self.traders_map[trade['trader_id']]].add_trade(trade)
         else:
-            inventory = Inventory(trade.trader_id)
+            inventory = Inventory(trade['trader_id'])
             self.inventories.append(inventory)
-            self.traders_map[trade.trader_id] = len(self.inventories) - 1
+            self.traders_map[trade['trader_id']] = len(self.inventories) - 1
 
 
 INVENTORY_STORE = InventoryStore()
