@@ -5,6 +5,7 @@ Settings for other modules can be defined here - but should be placed clubbed to
 region.
 
 """
+import os
 
 
 ###############################################################################
@@ -17,3 +18,7 @@ LOGGING_NAMESPACE = 'fin'
 
 
 ###############################################################################
+# TRADE RECEIVER
+###############################################################################
+
+SECRET_KEY=os.environ.get('SECRET_KEY') or 'very-difficult-to-crack-secret-key'
