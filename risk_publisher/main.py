@@ -5,75 +5,15 @@ import time
 
 from common_utils import Logger
 from common_utils.consumer import Consumer
+# noinspection PyUnresolvedReferences
 from config import *
+# noinspection PyUnresolvedReferences
+from models import *
+# noinspection PyUnresolvedReferences
+from calculators import *
 
 logger = Logger.Logger("risk_publisher").get()
 logger.setLevel(logging.DEBUG)
-
-
-class SingleTrade:
-
-    """Represents a single trade"""
-
-    def __init__(self, symbol, qty, side):
-        self.symbol = symbol
-        self.qty = qty
-        self.side = side
-
-    def get_symbol(self):
-        return self.symbol
-
-    def get_qty(self):
-        return self.qty
-
-    def get_side(self):
-        return self.side
-
-
-class Inventory:
-
-    """Represents the inventory of a single trader - collection of SingleTrade objects"""
-
-    def __init__(self, trader_id):
-        self.inventory = []
-        self.trader_id = trader_id
-
-    def add_trade(self, trade):
-        if len(self.inventory) > 0:
-            for i in range(0, len(self.inventory)):
-                if self.inventory[i].symbol == trade['symbol']:
-                    if self.inventory[i].side == trade['side']:
-                        self.inventory[i].qty += trade['qty']
-                    else:
-                        if self.inventory[i].qty > trade['qty']:
-                            self.inventory[i].qty -= trade['qty']
-                        else:
-                            self.inventory[i].qty = trade['qty'] - self.inventory[i]['qty']
-                            self.inventory[i].side = trade['side']
-                else:
-                    self.inventory.append(trade)
-        else:
-            self.inventory.append(trade)
-
-
-class InventoryStore:
-
-    """ Set of all inventories that the risk publisher will maintain"""
-
-    def __init__(self):
-        self.inventories = []
-        self.traders_map = dict()
-
-    def add_trade(self, trade):
-        if trade['trader_id'] in self.traders_map:
-            self.inventories[self.traders_map[trade['trader_id']]].add_trade(trade)
-        else:
-            inventory = Inventory(trade['trader_id'])
-            self.inventories.append(inventory)
-            self.traders_map[trade['trader_id']] = len(self.inventories) - 1
-
-
-INVENTORY_STORE = InventoryStore()
 
 
 class RiskPublisher:
@@ -82,8 +22,13 @@ class RiskPublisher:
 
     def __init__(self):
         self.threads = []
+        self.calculators = []
+        self.cache_md = None
+        self.inventory_store = InventoryStore()
 
     def start(self):
+        self.create_calculators()
+
         logger.info('Listening to entered trades...')
         t = Thread(target=self.start_listening_trades)
         self.threads.append(t)
@@ -97,23 +42,43 @@ class RiskPublisher:
         time.sleep(1)
 
     def start_listening_quotes(self):
+        # noinspection PyUnresolvedReferences
         consumer = Consumer(subcfg_quotes)
         with consumer:
             consumer.consume(self.on_quotes_callback)
 
     def start_listening_trades(self):
+        # noinspection PyUnresolvedReferences
         consumer = Consumer(subcfg_trades)
         with consumer:
             consumer.consume(self.on_trades_callback)
 
     # noinspection PyMethodMayBeStatic
     def on_trades_callback(self, body):
-        INVENTORY_STORE.add_trade(trade=json.loads(body))
+        print('trades callback')
+        if self.cache_md is not None:
+            self.run_calculators()
+        self.inventory_store.add_trade(trade=json.loads(body))
         logger.debug('Received trade ----> {}'.format(body))
 
     # noinspection PyMethodMayBeStatic
     def on_quotes_callback(self, body):
+        self.cache_md = json.loads(body)
+        print('quotes callback')
+        if not self.inventory_store.is_inventory_empty():
+            self.run_calculators()
         logger.debug('Received quote -----> {}'.format(body))
+
+    def create_calculators(self):
+        self.calculators.append(ProfitLoss())
+        self.calculators.append(PortfolioComposition())
+
+    def run_calculators(self):
+        print('running calc')
+        for calculator in self.calculators:
+            print('running now')
+            calculator.run(self.inventory_store, self.cache_md)
+        print(self.inventory_store.get_inventories)
 
 
 if __name__ == "__main__":
