@@ -71,6 +71,7 @@ class RiskPublisher:
 
     def create_calculators(self):
         self.calculators.append(ProfitLoss())
+        self.calculators.append(PortfolioComposition())
 
     def run_calculators(self):
         print('running calc')

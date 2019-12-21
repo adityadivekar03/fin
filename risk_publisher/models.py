@@ -24,6 +24,16 @@ class SingleTrade:
     def set_metric(self, key, value):
         self.calculated_metrics[key] = value
 
+    def get_metric(self, key):
+        return self.calculated_metrics[key]
+
+    def set_rolling_metric(self, key, value):
+        if key not in self.calculated_metrics:
+            self.calculated_metrics[key] = list()
+            self.calculated_metrics[key].append(value)
+        else:
+            self.calculated_metrics[key].append(value)
+
 
 class Inventory:
 
@@ -89,7 +99,7 @@ class RiskCalculator:
     def run(self, inventory_store, market_data):
         if self.inventory_level:
             for inventory in inventory_store.get_inventories():
-                self.calculate(inventory)
+                self.calculate(inventory, market_data)
         else:
             for inventory in inventory_store.get_inventories():
                 print('level 1')
