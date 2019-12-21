@@ -69,6 +69,12 @@ class InventoryStore:
             self.inventories.append(inventory)
             self.traders_map[trade['trader_id']] = len(self.inventories) - 1
 
+    def is_inventory_empty(self):
+        return len(self.inventories) == 0
+
+    def get_inventories(self):
+        return self.inventories
+
 
 class RiskCalculator:
 
@@ -77,21 +83,21 @@ class RiskCalculator:
     Calculators can be at a single trade level or at the inventory level.
     """
 
-    def __init__(self, market_data, inventory_store):
-        self.inventory_store = inventory_store
-        self.market_data = market_data
+    def __init__(self):
         self.inventory_level = False  # Should run at Inventory or at SingleTrade level
 
-    def run(self):
+    def run(self, inventory_store, market_data):
         if self.inventory_level:
-            for inventory in self.inventory_store.inventories:
+            for inventory in inventory_store.get_inventories():
                 self.calculate(inventory)
         else:
-            for inventory in self.inventory_store.inventories:
+            for inventory in inventory_store.get_inventories():
+                print('level 1')
                 for trade in inventory.trades:
-                    self.calculate(trade)
+                    print('level 2')
+                    self.calculate(trade, market_data)
         return
 
-    def calculate(self, calculator_input):
+    def calculate(self, calculator_input, market_data):
         # each calculator needs to implement this with its own behaviour
         pass
